@@ -1,6 +1,6 @@
 import numpy as np
 import cv2 as cv
-import lib.py.FlowerScan as processor
+import FlowerScan as processor
  
 def rescale_frame(frame, scale):    # works for image, video, live video
     width = int(frame.shape[1] * scale)
@@ -8,7 +8,7 @@ def rescale_frame(frame, scale):    # works for image, video, live video
     dimensions = (width, height)
     return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
 
-cap = cv.VideoCapture(2)
+cap = cv.VideoCapture(1)
 cap.set(cv.CAP_PROP_FRAME_WIDTH,1920)
 cap.set(cv.CAP_PROP_FRAME_HEIGHT,1080)
 

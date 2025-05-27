@@ -1,0 +1,15 @@
+[project]
+name = "BeeSwarmSimVision"
+version = "0.0.1"
+authors = [
+  { name="Keegan Rubingh", email="keeganrubingh@gmail.com" },
+]
+description = "A package that uses openCV to localize players in bee swarm simulator (on roblox) based on recognized objects"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
