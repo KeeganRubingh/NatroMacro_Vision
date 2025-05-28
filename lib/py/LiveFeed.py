@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv
 import FlowerScan as processor
+import easygui
+import threading
  
 def rescale_frame(frame, scale):    # works for image, video, live video
     width = int(frame.shape[1] * scale)
@@ -8,7 +10,27 @@ def rescale_frame(frame, scale):    # works for image, video, live video
     dimensions = (width, height)
     return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
 
-cap = cv.VideoCapture(1)
+
+def displayStream(stream:cv.VideoCapture,title:str):
+    while(True):
+        ret,frame = stream.read()
+        if(not ret):
+            return
+        cv.imshow(title, frame)
+        timer = threading.Timer(0.5)
+        timer.join()
+
+contSelect = True
+while(contSelect):
+    cameraNum = easygui.integerbox("Select Camera#")
+    try:
+        cap = cv.VideoCapture(cameraNum)
+    except:
+        easygui.exceptionbox("That camera does not exist!")
+    
+    threading.Thread(None,displayStream,"StreamDispThread",[cap,"Camera Output"])
+    contSelect = not easygui.boolbox("Is this camera correct?")
+    
 cap.set(cv.CAP_PROP_FRAME_WIDTH,1920)
 cap.set(cv.CAP_PROP_FRAME_HEIGHT,1080)
 
