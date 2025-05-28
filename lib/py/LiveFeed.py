@@ -11,32 +11,35 @@ def rescale_frame(frame, scale):    # works for image, video, live video
     return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
 
 
-def displayStream(stream:cv.VideoCapture,title:str):
-    while(True):
-        ret,frame = stream.read()
-        if(not ret):
-            return
-        cv.imshow(title, frame)
-        timer = threading.Timer(0.5)
-        timer.join()
+skipCamera = False
+cameraToSkipTo = 1
 
-contSelect = True
-while(contSelect):
-    cameraNum = easygui.integerbox("Select Camera#")
-    try:
+if(not skipCamera):
+    camWin = None
+    contSelect = True
+    while(contSelect):
+        cameraNum = easygui.integerbox("Select Camera#")
+        
         cap = cv.VideoCapture(cameraNum)
-    except:
-        easygui.exceptionbox("That camera does not exist!")
-    
-    threading.Thread(None,displayStream,"StreamDispThread",[cap,"Camera Output"])
-    contSelect = not easygui.boolbox("Is this camera correct?")
-    
+        
+        if(not cap.isOpened()): 
+            easygui.msgbox("That camera does not exist!")
+            continue
+        
+        ret,frame = cap.read()
+        cv.imshow('Camera', frame)
+        contSelect = not easygui.boolbox("Is this camera correct?","Camera Select")
+else:
+    cap = cv.VideoCapture(cameraToSkipTo)
+cv.destroyAllWindows()
+
 cap.set(cv.CAP_PROP_FRAME_WIDTH,1920)
 cap.set(cv.CAP_PROP_FRAME_HEIGHT,1080)
 
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
+
 while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
