@@ -46,25 +46,26 @@ class LiveFeed():
                     contSelect = not easygui.boolbox("Is this correct?","Window Select")
             self.getFrame = lambda:(np.array(sct.grab(cameraNum)))
         elif(source == "OBS Virtual Camera"):
-            camWin = None
             contSelect = True
+            cap = None
             while(contSelect):
                 cameraNum = easygui.integerbox("Select Camera#")
                 
                 cap = cv.VideoCapture(cameraNum)
-                self.cap = cap
                 
                 if(not cap.isOpened()): 
                     easygui.msgbox("That camera does not exist!")
                     continue
                 
-                cap.set(cv.CAP_PROP_FRAME_WIDTH)
+                cap.set(cv.CAP_PROP_FRAME_WIDTH,rect[2])
+                cap.set(cv.CAP_PROP_FRAME_HEIGHT,rect[3])
                 
                 ret,frame = cap.read()
                 print(frame.shape)
                 cv.imshow('Camera', frame)
                 contSelect = not easygui.boolbox("Is this correct?","Window Select")
-            self.getFrame = lambda:(cap.read()[1])
+            self.cap = cap
+            self.getFrame = lambda:self.cap.read()[1]
 
             
         cv.destroyAllWindows()
@@ -76,9 +77,10 @@ class LiveFeed():
         while True:
             # Capture frame-by-frame
             frame = self.getFrame()
+            print(frame)
             
             # Our operations on the frame come here
-            out = processor.processScreenShot(frame)
+            out = frame
             # out = frame
             # Display the resulting frame
             cv.imshow('Processed Stream', out)
