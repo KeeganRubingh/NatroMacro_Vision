@@ -7,22 +7,23 @@ import FlowerScan as processor
 import easygui
 import threading
 import mss
-import win32gui
+import pywin32_system32 as win32gui
  
  
 source = easygui.choicebox("Set video source",choices=[
-    "Whole Monitor (MUST BE FULLSCREEN)",
+    "Whole Monitor",
     "OBS Virtual Camera"
 ])
 
 
 getFrame = lambda:()
 cap = None
-window = win32gui.FindWindow(None,"Natro Macro")
+win32gui
+window = win32gui.FindWindow(None,"Roblox")
 width = win32gui.GetWindowRect(window)
 print(width)
 
-if(source == "Whole Monitor (MUST BE FULLSCREEN)"):
+if(source == "Whole Monitor"):
     sct = mss.mss()
     choices=sct.monitors[1:]
     cameraNum = choices[0]
@@ -39,7 +40,7 @@ if(source == "Whole Monitor (MUST BE FULLSCREEN)"):
             
             screenshot = np.array(sct.grab(cameraNum))
             cv.imshow('Camera', screenshot)
-            contSelect = not easygui.boolbox("Is this camera correct?","Camera Select")
+            contSelect = not easygui.boolbox("Is this correct?","Window Select")
     getFrame = lambda:(np.array(sct.grab(cameraNum)))
 elif(source == "OBS Virtual Camera"):
     camWin = None
@@ -58,7 +59,7 @@ elif(source == "OBS Virtual Camera"):
         ret,frame = cap.read()
         print(frame.shape)
         cv.imshow('Camera', frame)
-        contSelect = not easygui.boolbox("Is this camera correct?","Camera Select")
+        contSelect = not easygui.boolbox("Is this correct?","Window Select")
     getFrame = lambda:(cap.read()[1])
 
     
