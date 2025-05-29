@@ -1,0 +1,12 @@
+certifi==2025.4.26
+distlib==0.3.9
+easygui==0.98.3
+filelock==3.18.0
+mss==10.0.0
+numpy==2.2.6
+opencv-python==4.11.0.86
+packaging==25.0
+pipenv==2025.0.2
+platformdirs==4.3.8
+pywin32==310
+virtualenv==20.31.2
