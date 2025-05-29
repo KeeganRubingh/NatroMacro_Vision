@@ -1,0 +1,13 @@
+train: images/train  # train images (relative to 'path') 4 images
+val: images/val
+
+names:
+  0: MiscToken
+  1: TokenLink
+  2: TokenBL
+  3: TokenBomb
+  4: TokenBoost
+  5: FieldCorner
+  6: Ladybug
+  7: RhinoBeetle
+  8: Mantis

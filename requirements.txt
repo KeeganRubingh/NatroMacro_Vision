@@ -25,8 +25,10 @@ pipenv==2025.0.2
 platformdirs==4.3.8
 psutil==7.0.0
 py-cpuinfo==9.0.0
+pyee==13.0.0
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
+python-ffmpeg==2.0.12
 pytz==2025.2
 pywin32==310
 PyYAML==6.0.2

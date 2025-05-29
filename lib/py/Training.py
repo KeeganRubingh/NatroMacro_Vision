@@ -1,14 +1,15 @@
 from ultralytics import YOLO
 import easygui
-from LiveFeed import LiveFeed
+import LiveFeed
 import cv2 as cv
 import random
 import string
 import numpy as np
+import threading, os
 
 model = YOLO("yolov8s")
-feed = LiveFeed()
-annotationClasses = {
+feed = LiveFeed.LiveFeed()
+annotationClasses = [
     "MiscToken",
     "TokenLink",
     "TokenBL",
@@ -18,7 +19,7 @@ annotationClasses = {
     "Ladybug",
     "RhinoBeetle",
     "Mantis"
-}
+]
 
 annotations = []
 
@@ -30,10 +31,13 @@ def SaveImage(img,name):
         file.write(tData)
     cv.imwrite('lib/py/trainingData/detect/images/train/img'+ name + ".png",img)
 def SaveAnnotation(annotClassName,frame,imWidth,imHeight):
+    print(frame)
+    print(imWidth)
+    print(imHeight)
     annotations.append({
-        "AnnotationClass":annotClassName,
-        "CenterX":(float(frame[0]) + float(frame[2])/2)/(imWidth),
-        "CenterY":(float(frame[1]) + float(frame[3])/2)/(imHeight),
+        "AnnotationClass":str(annotationClasses.index(annotClassName)),
+        "CenterX":(float(frame[0]) + float(frame[2])/2)/float(imWidth),
+        "CenterY":(float(frame[1]) + float(frame[3])/2)/float(imHeight),
         "Width":float(frame[2])/float(imWidth),
         "Height":float(frame[3])/float(imHeight)
     })
@@ -41,9 +45,14 @@ def SaveAnnotation(annotClassName,frame,imWidth,imHeight):
 def StartAnnotatingImages():
     feed.chooseStream()
     while True:
-        contBox = easygui.ccbox("Press continue to capture this frame or CANCEL to end capturing")
-        if(not contBox):
-            return
+        
+        contBox = None 
+        choiceEvent = threading.Event()
+        def Choose():
+            contBox = easygui.ccbox("Press continue to capture this frame or CANCEL to end capturing")
+            choiceEvent.set()
+            feed.pauseEvent.set()
+        feed.viewStream()
         img = feed.getSingleFrame()
         imgName = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         windowName = "Pictured Frame - " + imgName
@@ -52,10 +61,15 @@ def StartAnnotatingImages():
         while(shouldcontinue):
             selection = cv.selectROI(windowName,annotatedImage,True,True)
             print(selection)
+            if(selection[2] < 0 or selection[3] < 0):
+                break
             if(selection == (0,0,0,0)):
                 break
             selectedRegion = img[selection[1]:selection[1]+selection[3],selection[0]:selection[0]+selection[2]]
-            cv.imshow("Selected Region",selectedRegion)
+            try:
+                cv.imshow("Selected Region",selectedRegion)
+            except:
+                continue
             annotType = easygui.choicebox("Pick the object type",choices=annotationClasses)
             cv.destroyWindow("Selected Region")
             if(not annotType):
@@ -65,9 +79,10 @@ def StartAnnotatingImages():
             p2 = (selection[0],selection[1]+selection[3])
             cv.rectangle(annotatedImage,p1,p2,(0,0,255),4)
             cv.putText(annotatedImage,annotType,p1,1,1,(0,0,255),2)
-            SaveAnnotation(annotType,selection,img.shape[0],img.shape[1])
+            SaveAnnotation(annotType,selection,img.shape[1],img.shape[0])
         cv.destroyWindow(windowName)
         SaveImage(img,imgName)
 
-StartAnnotatingImages()
+# StartAnnotatingImages()
+# feed.cleanup()
 # model.predict('lib/py/RoseField.png',save=True)
