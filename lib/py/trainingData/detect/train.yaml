@@ -1,5 +1,7 @@
-train: images/train  # train images (relative to 'path') 4 images
+path:
+train: images/train
 val: images/val
+test:
 
 names:
   0: MiscToken

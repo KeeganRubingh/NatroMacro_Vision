@@ -26,12 +26,12 @@ def SaveImage(img,name):
 def SaveAnnotation(annotClassName,frame,imShape):
     annotations.append(AnnotationDef.fromFrame(annotClassName,frame,imShape))
 
-def DirectSaveAnnotations(name,annots: list[AnnotationDef]):
+def DirectSaveAnnotations(path,annots: list[AnnotationDef]):
     tData = ""
     for v in annots:
         vL = v.getListRepresentation()
         tData += str(vL["AnnotationClass"]) + " " + str(vL["CenterX"]) + " " + str(vL["CenterY"]) + " " + str(vL["Width"]) + " " + str(vL["Height"]) + "\n"
-    with open(pathlib.Path('lib/py/trainingData/detect/labels/train').joinpath(name),'w') as file:
+    with open(path,'w') as file:
         file.write(tData)
         
 
@@ -158,10 +158,12 @@ def StartEditingImages():
             if(selectionROI == (0,0,0,0)):
                 continue
             
-            annots[selection] = AnnotationDef.fromFrame(annotationClasses[selectedAnnot.annotationIndex],selectionROI,img.shape)
+            annots[selection] = AnnotationDef.fromFrame(annotationClasses[int(selectedAnnot.annotationIndex)],selectionROI,img.shape)
+            cv.destroyWindow("Repositioning")
             
         if(key == ord('d')):
             annots.pop(selectionmap[selection])
+            selection = selection%len(annots)
         
         if(key == ord('p')):
             cv.destroyAllWindows()
@@ -170,7 +172,13 @@ def StartEditingImages():
             save = easygui.ccbox("Save changes?","Save",("Save","Exit without saving"))
             if(save):
                 print("Saved!")
-                DirectSaveAnnotations(finalpath.with_suffix(".txt").name,annots)
+                DirectSaveAnnotations(finalpath.with_suffix(".txt"),annots)
+            
+            if(easygui.ccbox("Exit?","Exit",("Yes","No"))):
+                exit()
             else:
-                print("Exited without saving!")
-            exit()
+                StartEditingImages()
+
+
+if(__name__ == "__main__"):
+    StartEditingImages()

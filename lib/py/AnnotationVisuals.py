@@ -41,7 +41,7 @@ class AnnotationDef():
         yOff = self.height/2
         p1 = (int((self.centerX - xOff)*img.shape[1]),int((self.centerY - yOff)*img.shape[0]))
         p2 = (int((self.centerX + xOff)*img.shape[1]),int((self.centerY + yOff)*img.shape[0]))
-        text = annotationClasses[self.annotationIndex]
+        text = annotationClasses[int(self.annotationIndex)]
         if(suffix):
             text += " - " + suffix
         cv.rectangle(img,p1,p2,color,4)
