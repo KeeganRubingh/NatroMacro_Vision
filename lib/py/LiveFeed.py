@@ -26,6 +26,7 @@ class LiveFeed():
     
     def __init__(self):
         self.getFrame = lambda:()
+        self.frameMod = lambda f:f
         self.cap = None
         self.cwr = None
         self.sourceType = None
@@ -135,7 +136,7 @@ class LiveFeed():
         cv.destroyAllWindows()
 
     def getSingleFrame(self):
-        return self.getFrame()
+        return self.frameMod(self.getFrame())
     
     def pause(self):
         self.pauseEvent.set()
@@ -153,7 +154,7 @@ class LiveFeed():
         self.streamOpen = True
         while True:
             # Capture frame-by-frame
-            frame = self.getFrame()
+            frame = self.getSingleFrame()
             if(frame is None):
                 print("Video Stream Returned None! (Likely just end of stream)")
                 exit()
@@ -186,11 +187,9 @@ class LiveFeed():
         
         return self.playerThread
     
-    def viewStreamAndWait(self):
-        thread = self.viewStream()
-        thread.daemon
+    def modifyStream(self,mod):
+        self.frameMod = mod
         
-    
     def cleanup(self):
         # When everything done, release the capture
         if(self.cap):
@@ -199,4 +198,4 @@ class LiveFeed():
             self.cwr.release()
 
 if(__name__ == "__main__"):
-    import Training
+    import lib.py.Annotations as Annotations

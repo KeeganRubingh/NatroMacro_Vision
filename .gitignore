@@ -45,3 +45,10 @@ lib-cov
 /coverage
 /test/test-apps/*/dist
 MMScreenshots/*
+
+# Secrets
+Secrets.*
+
+# Cache
+*.pyc
+trainingData/*
