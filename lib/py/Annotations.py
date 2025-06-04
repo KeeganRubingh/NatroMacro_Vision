@@ -44,6 +44,10 @@ def StartAnnotatingImages():
         windowName = "Pictured Frame - " + imgName
         shouldcontinue = True
         annotatedImage = img.copy()
+        global annotations 
+        annotations = []
+        if(cv.waitKey(0)==ord('x')):
+            exit()
         while(shouldcontinue):
             selection = cv.selectROI(windowName,annotatedImage,True,True)
             print(selection)
@@ -72,13 +76,14 @@ def DeserializeAnnotations(imgPath:pathlib.Path) -> list[AnnotationDef]:
     parts[4] = "labels"
     finalpath = pathlib.Path("/".join(parts)).with_suffix(".txt")
     reader = finalpath.open()
-    
+    print(finalpath)
     annots = []
     
     while(line := reader.readline()):
         annot = AnnotationDef.fromString(line)
         annots.append(annot)
     
+    print(annots)
     return annots
 
 def renderEditor(annots:list[AnnotationDef], img:cv.Mat, selectedIndex:int, renderOtherThanSelection=True, emphasizeSelection=False):
@@ -109,7 +114,7 @@ def buildSortMap(annots):
 
 def StartEditingImages():
     path = pathlib.Path("lib/py/trainingData/detect/images")
-    category = easygui.choicebox("Choose Category",choices=os.listdir(path))
+    category = easygui.choicebox("Choose Category",choices=os.listdir(path.absolute()))
     path = path.joinpath(category)
     
     finalpath = None
@@ -127,6 +132,7 @@ def StartEditingImages():
     selection = -1
     newimg = img.copy()
     editor = renderEditor(annots,newimg,selection)
+    selection = 0
     cv.destroyWindow("Opened Image")
     cv.imshow("Q+E, C, D, P, Enter",editor)
     easygui.msgbox("Q/E keys to select, C to reposition, D to delete, R to change annotation type, P to reset window,Enter to end")
@@ -135,6 +141,7 @@ def StartEditingImages():
         ## Create a map between the annotations and them sorted by length
         ## This makes the selection system make more sense while still allowing us to write back to the file
         selectionmap = buildSortMap(annots)
+        print(selectionmap)
         
         ## Render our editor
         editor = renderEditor(annots,img.copy(),selectionmap[selection])
@@ -151,7 +158,7 @@ def StartEditingImages():
             selection = int(selection+1)%len(annots)
         
         if(key == ord('c')):
-            selectionROI = cv.selectROI("Repositioning",renderEditor(annots,img.copy(),None,False,True),True,True)
+            selectionROI = cv.selectROI("Repositioning",renderEditor(annots,img.copy(),selectionmap[selection],False,True),True,True)
             selectedAnnot = annots[selectionmap[selection]]
             if(selectionROI[2] < 0 or selectionROI[3] < 0):
                 continue
@@ -160,6 +167,18 @@ def StartEditingImages():
             
             annots[selection] = AnnotationDef.fromFrame(annotationClasses[int(selectedAnnot.annotationIndex)],selectionROI,img.shape)
             cv.destroyWindow("Repositioning")
+        
+        if(key == ord('a')):
+            annotType = easygui.choicebox("Pick the object type",choices=annotationClasses)
+            selectionROI = cv.selectROI("Adding",renderEditor(annots,img.copy(),-1,True,False),True,True)
+            selectedAnnot = annots[selectionmap[selection]]
+            if(selectionROI[2] < 0 or selectionROI[3] < 0):
+                continue
+            if(selectionROI == (0,0,0,0)):
+                continue
+            
+            annots.append(AnnotationDef.fromFrame(annotType,selectionROI,img.shape))
+            cv.destroyWindow("Adding")
             
         if(key == ord('d')):
             annots.pop(selectionmap[selection])
@@ -172,7 +191,10 @@ def StartEditingImages():
             save = easygui.ccbox("Save changes?","Save",("Save","Exit without saving"))
             if(save):
                 print("Saved!")
-                DirectSaveAnnotations(finalpath.with_suffix(".txt"),annots)
+                parts = list(finalpath.parts)
+                parts[4] = "labels"
+                finallabelpath = pathlib.Path("/".join(parts)).with_suffix(".txt")
+                DirectSaveAnnotations(finallabelpath.with_suffix(".txt"),annots)
             
             if(easygui.ccbox("Exit?","Exit",("Yes","No"))):
                 exit()

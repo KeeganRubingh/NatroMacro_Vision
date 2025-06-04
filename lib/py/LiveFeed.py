@@ -5,7 +5,6 @@ import easygui
 import mss
 import win32gui
 import random,string,os
-from ffmpeg import FFmpeg
 import pathlib
 import threading
 
@@ -111,19 +110,6 @@ class LiveFeed():
             if(not cap.isOpened()):
                 print("Couldn't read video! Trying ffmpeg.")
                 newName = fullPath.with_suffix(".mp4")
-                cap = cv.VideoCapture(newName,0)
-                if(not cap.isOpened()):
-                    ffmpeg = (
-                        FFmpeg()
-                        .input(fullPath)
-                        .output(
-                            newName,
-                            {"codec:v": "libx264"},
-                            preset="veryslow",
-                            crf=24,
-                        )
-                    )
-                    ffmpeg.execute()
                 cap = cv.VideoCapture(newName,0)
                 if(not cap.isOpened()):
                     exit()
